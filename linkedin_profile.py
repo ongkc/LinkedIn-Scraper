@@ -61,7 +61,7 @@ def save_to_csv(file_name, role, driver):
     '''this function finds linkedin profile and saves to csv
     '''
     #open the csv to input the information
-    f = open(file_name + " " + role + ".csv", 'a', newline='', encoding="utf-8")
+    f = open(file_name + ".csv", 'a', newline='', encoding="utf-8")
     fieldnames = ['name', 'profile_url', 'description']
     writer = csv.DictWriter(f, fieldnames=fieldnames)
     for _ in range(100):
@@ -128,7 +128,7 @@ def save_to_csv(file_name, role, driver):
         if(len(next1) == 0):
             f.close()                
             break
-        driver.find_element_by_xpath('//button[@class="artdeco-pagination__button artdeco-pagination__button--next artdeco-button artdeco-button--muted artdeco-button--icon-right artdeco-button--1 artdeco-button--tertiary ember-view"]').click()
+        driver.find_element_by_css_selector('.artdeco-pagination__button.artdeco-pagination__button--next.artdeco-button.artdeco-button--muted.artdeco-button--icon-right.artdeco-button--1.artdeco-button--tertiary.ember-view').click()
     f.close()
 
 #search based on keyword
@@ -149,13 +149,11 @@ def filter(location, company, driver):
     location_search_element_path = '//*[@class="search-s-facet__values search-s-facet__values--geoRegion"]'
     company_search_element_path = '//*[@class="search-s-facet search-s-facet--currentCompany inline-block ember-view"]'
     apply_button_element_path = '//button[@class="search-advanced-facets__button--apply ml4 mr2 artdeco-button artdeco-button--3 artdeco-button--primary ember-view"]'
-    scroll_bar_element_path = 'artdeco-modal-content'
 
     filter = driver.find_element_by_xpath(filter_button_element_path)
     filter.click()
     time.sleep(1)
 
-    scroll_bar = driver.find_element_by_tag_name(scroll_bar_element_path)
 
     #filter by location
     location_search = driver.find_element_by_xpath(location_search_element_path)            
@@ -176,7 +174,7 @@ def filter(location, company, driver):
     company_search.find_element_by_tag_name("input").send_keys(Keys.ENTER)
     time.sleep(1) 
 
-    driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", scroll_bar)
+    driver.execute_script("window.scrollTo(0, 2140)")
     time.sleep(1)
 
     apply = driver.find_element_by_xpath(apply_button_element_path)
@@ -195,19 +193,20 @@ def login(login_id, login_password, driver):
 
     driver.find_element_by_xpath( '//button[@class="btn__primary--large from__button--floating"]').click()
 
-def main(name, keyword, username, password):
+def main(name, role, username, password):
     # driver = webdriver.Chrome(chrome_path, chrome_options=options)
     driver = webdriver.Chrome(executable_path=chrome_path)
+
 
     login_id = username
     login_password = password
     
     locations = "United States"
-    companies = []
-    companies.append(name.capitalize())
-    roles = []
-    roles.append(keyword)
+    companies = name.split(",")
     login(login_id, login_password, driver)
+    roles = role.split(",")
+
+
     for company in companies:
         x = 0
         if(x != 0):
@@ -215,12 +214,11 @@ def main(name, keyword, username, password):
             if (len(check_clear) != 0):
                 #clear the filtering
                 driver.find_element_by_xpath( '//span[@class="search-filters-bar__selected-filter-count mv0 ml1"]').click()
-            filter(locations, company)
+            filter(locations, company.capitalize(), driver)
         
-        create_new_file(company)
-
-        for role in roles:
-            key_word = company + " " + role
+        create_new_file(company.capitalize())
+        for role_ in roles:        
+            key_word = company.capitalize() + " " + role_
             print(key_word)
             search(key_word, driver)
             if(x == 0):
@@ -228,9 +226,9 @@ def main(name, keyword, username, password):
                 if (len(check_clear) != 0):
                     #clear the filtering
                     driver.find_element_by_xpath( '//span[@class="search-filters-bar__selected-filter-count mv0 ml1"]').click()
-                filter(locations, company, driver)
+                filter(locations, company.capitalize(), driver)
                 x += 1
-            save_to_csv(company, role, driver)
+            save_to_csv(company.capitalize(), role_, driver)
     message = "Completed!"
     popupmsg(message)
 # check if all box filled
