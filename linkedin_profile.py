@@ -199,9 +199,6 @@ def main(name, keyword, username, password):
     # driver = webdriver.Chrome(chrome_path, chrome_options=options)
     driver = webdriver.Chrome(executable_path=chrome_path)
 
-    # login_id = "gomez.d.m.t@gmail.com"
-    # login_password = "IL0V3KC0NG"
-
     login_id = username
     login_password = password
     
